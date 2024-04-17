@@ -85,6 +85,9 @@ services:
   geth:
     image: "ethereum/client-go:latest"
     command:
+      - --ipcdisable
+      # sockets requires short paths, so disable ipc
+      # https://github.com/ethereum/go-ethereum/issues/16342#issuecomment-444470319
       - --http
       - --http.api=eth,net,web3
       - --http.addr=0.0.0.0
