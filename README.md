@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This repository is a fork of the [POS Devent](https://github.com/ivy-net/eth-pos-devnet) repository, extended by a automate deployment of the EL (EigenLayer) contracts.
+This repository is a fork of the [POS DevNet](https://github.com/ivy-net/eth-pos-devnet) repository, extended by an automatic deployment of the EigenLayer contracts.
 
 ### Quick Start
 
