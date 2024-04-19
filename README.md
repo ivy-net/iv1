@@ -1,4 +1,50 @@
-# Ethereum Proof-of-Stake Devnet
+# Ethereum Proof-of-Stake Devnet with deployment of the EigenLayer contracts
+
+## Introduction
+
+This repository is a fork of the [POS Devent](https://github.com/ivy-net/eth-pos-devnet) repository, extended by a automate deployment of the EL (EigenLayer) contracts.
+
+### Quick Start
+
+Ensure that you have docker and packer installed.
+
+Build the image with packer
+```
+cd eigenlayer
+packer init
+packer build -var 'version=0.5' .
+```
+Start docker compose
+```
+cd ../
+./clean.sh
+docker-compose up -d
+```
+
+## Docker image to deploy EigneLayer
+
+The docker image to deploy the EigenLayer contracts bases on the [Foundry](https://book.getfoundry.sh/tutorials/foundry-docker) one.
+During the build process the image is enriched by addition of the compile smart contracts from the EigenLayer Contracts and EigenLayer Middleware repositories.
+
+The image is prepared with the [packer](https://www.packer.io/) tool by HashiCorp.
+It is defined in the [eigenlayer-deploy.pkr.hcl](eigenlayer/eigenlayer-deploy.pkr.hcl) file.
+The file can be easily extended (e.g. by addition of the AVS contracts).
+
+## Extension of docker-compose
+
+There are a few small adjustment to the original docker-compose code.
+The most obvious one is addition of the new image with the EL code.
+To enable deployment there are also small tweaks in the geth container definition.
+Firstly, the healthcheck block is added.
+It is to give time for blockchain to settle, before publishing the EL contracts.
+Additionally, the insecure http connections are permitted from the remote hosts.
+This change enables forge (from the foundry image) to deployed the code.
+
+
+## Ethereum Proof-of-Stake Devnet
+
+_The original documentation_
+
 
 This repository provides a docker-compose file to run a fully-functional, local development network for Ethereum with proof-of-stake enabled. This configuration uses [Prysm](https://github.com/prysmaticlabs/prysm) as a consensus client and [go-ethereum](https://github.com/ethereum/go-ethereum) for execution. **It starts from proof-of-stake** and does not go through the Ethereum merge.
 
@@ -35,7 +81,7 @@ $ docker compose up -d
 
 Each time you restart, you can wipe the old data using `./clean.sh`.
 
-Next, you can inspect the logs of the different services launched. 
+Next, you can inspect the logs of the different services launched.
 
 ```
 docker logs eth-pos-devnet-geth-1 -f
