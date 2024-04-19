@@ -92,6 +92,8 @@ services:
       - --http.api=eth,net,web3
       - --http.addr=0.0.0.0
       - --http.corsdomain=*
+      # To enable deployments with forge docker
+      - --http.vhosts=*
       - --ws
       - --ws.api=eth,net,web3
       - --ws.addr=0.0.0.0
@@ -105,6 +107,13 @@ services:
       - --password=/execution/geth_password.txt
       - --nodiscover
       - --syncmode=full
+    # Added for network to settle, so eigenlayer can be deployed
+    healthcheck:
+      test: wget http://localhost:8545 || exit 1
+      interval: 20s
+      timeout: 1s
+      retries: 5
+      start_period: 20s
     ports:
       - 8551:8551
       - 8545:8545
@@ -136,3 +145,28 @@ services:
         condition: service_started
     volumes:
       - ./consensus:/consensus
+
+  # Local image with to deployed EigenLayer Contracts
+  eigenlayer:
+    image: "ivy-net/iv1:latest"
+    command:
+      - script/deploy/devnet/M2_Deploy_From_Scratch.s.sol
+      - --rpc-url
+      - http://geth:8545
+      - --broadcast
+      - --sig
+      - "run(string memory configFile)"
+      - --unlocked
+      - --sender
+      - 0x123463a4b065722e99115d6c222f267d9cabb524
+      - --
+      - M2_deploy_from_scratch.anvil.config.json
+    working_dir: /eigenlayer/eigenlayer-contracts
+    depends_on:
+      geth:
+        condition: service_healthy
+
+# Extra image for network debugging
+#  test:
+#    image: "nicolaka/netshoot"
+#    command: sleep 3600
