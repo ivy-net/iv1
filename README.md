@@ -11,7 +11,7 @@ Ensure that you have docker and packer installed.
 Build the image with packer
 ```
 cd eigenlayer
-packer init
+packer init .
 packer build -var 'version=0.5' .
 ```
 Start docker compose
