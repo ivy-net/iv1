@@ -6,7 +6,7 @@ This repository is a fork of the [POS DevNet](https://github.com/ivy-net/eth-pos
 
 ### Quick Start
 
-Ensure that you have docker and packer installed.
+Ensure that you have docker and packer installed and docker daemon is running.
 
 Build the image with packer
 ```
