@@ -38,11 +38,6 @@ build {
       "cd eigenlayer-contracts",
       "forge install",
       "forge build",
-      "cd ../",
-      "git clone https://github.com/Layr-Labs/eigenlayer-middleware.git",
-      "cd eigenlayer-middleware",
-      "forge install",
-      "forge build"
     ]
   }
 
