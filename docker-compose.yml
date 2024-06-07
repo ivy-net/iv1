@@ -3,7 +3,7 @@ services:
   # Creates a genesis state for the beacon chain using a YAML configuration file and
   # a deterministic set of 64 validators.
   create-beacon-chain-genesis:
-    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:latest"
+    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:HEAD-aec349"
     command:
       - testnet
       - generate-genesis
@@ -28,7 +28,7 @@ services:
 
   # Sets up the genesis configuration for the go-ethereum client from a JSON file.
   geth-genesis:
-    image: "ethereum/client-go:latest"
+    image: "ethereum/client-go:v1.14.3"
     command: --datadir=/execution init /execution/genesis.json
     volumes:
       - ./execution:/execution
@@ -83,7 +83,8 @@ services:
   # Runs the go-ethereum execution client with the specified, unlocked account and necessary
   # APIs to allow for proof-of-stake consensus via Prysm.
   geth:
-    image: "ethereum/client-go:latest"
+#    image: "ethereum/client-go:v1.14.0"
+    image: "ethereum/client-go@sha256:0de486c8adf2f10ab0934b46fbe6c7a2c933eafad3fe4d02460e0e4c04154031"
     command:
       - --ipcdisable
       # sockets requires short paths, so disable ipc

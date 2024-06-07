@@ -23,6 +23,7 @@ source "docker" "eigenlayer" {
   ]
   commit = true
   image  = "ghcr.io/foundry-rs/foundry"
+  platform = "linux/amd64"
 }
 
 build {
