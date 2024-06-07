@@ -1,0 +1,32 @@
+{
+     "maintainer": "samlaf@eigenlabs.org",
+     "multisig_addresses": {
+          "operationsMultisig": "0x123463a4b065722e99115d6c222f267d9cabb524",
+          "pauserMultisig": "0x123463a4b065722e99115d6c222f267d9cabb524",
+          "executorMultisig": "0x123463a4b065722e99115d6c222f267d9cabb524"
+     },
+     "strategies": [],
+     "strategyManager": {
+          "init_paused_status": 0,
+          "init_withdrawal_delay_blocks": 1
+     },
+     "eigenPod": {
+          "PARTIAL_WITHDRAWAL_FRAUD_PROOF_PERIOD_BLOCKS": 1,
+          "MAX_RESTAKED_BALANCE_GWEI_PER_VALIDATOR": "32000000000"
+     },
+     "eigenPodManager": {
+          "init_paused_status": 30
+     },
+     "delayedWithdrawalRouter": {
+          "init_paused_status": 0,
+          "init_withdrawal_delay_blocks": 1
+     },
+     "slasher": {
+          "init_paused_status": 0
+     },
+     "delegation": {
+          "init_paused_status": 0,
+          "init_withdrawal_delay_blocks": 1
+     },
+     "ethPOSDepositAddress": "0x00000000219ab540356cBB839Cbe05303d7705Fa"
+}

@@ -147,11 +147,11 @@ services:
     volumes:
       - ./consensus:/consensus
 
-  # Local image with to deployed EigenLayer Contracts
+  # FoundaryUp based container with local image
+  # deploying EigenLayer Contracts
   eigenlayer:
-    image: "ivy-net/iv1:latest"
+    image: "ivy-net/iv1-avs:latest"
     command:
-      - script/deploy/devnet/M2_Deploy_From_Scratch.s.sol
       - --rpc-url
       - http://geth:8545
       - --broadcast
@@ -160,13 +160,39 @@ services:
       - --unlocked
       - --sender
       - 0x123463a4b065722e99115d6c222f267d9cabb524
+      - script/deploy/devnet/M2_Deploy_From_Scratch.s.sol
       - --
-      - M2_deploy_from_scratch.anvil.config.json
+      - M2_deploy_from_scratch.local.config.json
     working_dir: /eigenlayer/eigenlayer-contracts
+    volumes:
+      - ./eigenlayer/M2_deploy_from_scratch.local.config.json:/eigenlayer/eigenlayer-contracts/script/configs/devnet/M2_deploy_from_scratch.local.config.json
+      - ./eigenlayer/output.json:/eigenlayer/eigenlayer-contracts/script/output/devnet/M2_from_scratch_deployment_data.json
+      - ./eigenlayer/run-latest.json:/eigenlayer/eigenlayer-contracts/broadcast/M2_Deploy_From_Scratch.s.sol/32382/run-latest.json
     depends_on:
       geth:
         condition: service_healthy
 
+# There are problems with forge remapping, it does not work inside of docker.
+#  # FoundaryUp based container with local image
+#  # deploying Demo AVS
+#  avs-demo:
+#    image: "ivy-net/iv1-avs:latest"
+#    command:
+#      - script/IncredibleSquaringDeployer.s.sol
+#      - --rpc-url
+#      - http://geth:8545
+#      - --broadcast
+#      - --unlocked
+#      - --sender
+#      - 0x123463a4b065722e99115d6c222f267d9cabb524
+#      - -v
+#    working_dir: /eigenlayer/incredible-squaring-avs/contracts
+#    volumes:
+#      - ./eigenlayer/output.json:/eigenlayer/incredible-squaring-avs/contracts/script/output/32382/eigenlayer_deployment_output.json
+#    depends_on:
+#      eigenlayer:
+#        condition: service_completed_successfully
+#
 # Extra image for network debugging
 #  test:
 #    image: "nicolaka/netshoot"
