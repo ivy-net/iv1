@@ -19,6 +19,11 @@ variable "commit" {
   description = "Commit in EigenLayer-contracts matchin the one used by the AVS"
 }
 
+variable "gcp-password" {
+  type = "string"
+  description ="Password for gcp"
+}
+
 variable "version" {
   type        = string
   description = "Version of the image"
@@ -54,6 +59,12 @@ build {
     post-processor "docker-tag" {
       repository = "ivy-net/iv1-dev"
       tags       = ["${var.version}", "latest"]
+    }
+    post-processor "docker-push" {
+      login = true
+      login_server = ""
+      login_password = var.gcp-password
+      login_username = ""
     }
   }
 }
