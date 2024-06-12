@@ -78,7 +78,7 @@ This problem is unique to the POS network.
 At the end, stop docker:
 ```
 cd ../iv1/docker-compose/incredible-squaring-avs
-docker-compose -f docker-compose-avs.yml down
+docker-compose -f docker-compose.yml down
 ```
 
 ## Other scenarios
