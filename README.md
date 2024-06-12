@@ -3,81 +3,139 @@
 ## Introduction
 
 This repository is a fork of the [POS DevNet](https://github.com/ivy-net/eth-pos-devnet) repository, extended by an automatic deployment of the EigenLayer contracts.
+To see how it can be use to deploy an AVS check the [Quick Start](#quick-start) section.
+
+
+## Components
+
+### Docker compose
+There are two docker-compose configuration files located in subfolders of the `docker-compose` folder.
+The first one, in the `docker-compose/eigenlayer` subfolder, deploys the POS network with the EigenLayer contrats only.
+The second one, in the `docker-compose/incredible-squaring-avs` subfolder, adds the demo AVS to the network, but uses the older version of the EigenLayer.
+It is because this AVS does not work the latest EigenLayer code.
+
+### Packer
+There is the packer script to prepare and upload iv1 images to ECR.
+The images based on forge one and contains the source code with built smart contracts of the EigenLayer (EL) and the Incredible Squaring AVS (IS) projects.
+
+### Other folders
+Other folders contain information specific for the chain (`consenus` and `execution`) or deployed smart contracts (`eigenlayer` and `incredible-squaring-avs`).
 
 ## Quick Start
 
-### Preapre images
-Ensure that you have docker and packer installed and docker daemon is running.
-
-Build the images with packer
+To deploy the POS network with EigenLayer and Incredible Squaring AVS contracts follow these steps:
+* Clean previous deployments
 ```
-cd packer
-packer init .
-packer build -var 'version=0.9' .
+./clean.sh
 ```
-_NOTE: The proces might take 10--15 minutes, depends on hardware._
+* Navigate to the folder with docker compose definition for the IS AVS:
+```
+cd docker-compose/increadible-squaring-avs
+```
+* Start Docker Compose:
+```
+docker-compose up -d
+```
+* Check logs of the eigenlayer, avs-demo and cast containers to confirm that all the contracts have been deployed successfully and ether has been transferred:
+```
+docker-compose logs eigenlayer
+docker-compose logs avs-demo
+docker-compose logs cast
+```
+* Download the source code of the incredible-squaring-avs (to run the off-chain components):
+```
+cd ../../../
+git clone https://github.com/ivy-net/incredible-squaring-avs.git
+```
+* Copy config files specific for the POS chain to the `config-files` folder in the Incredible Squaring AVS.
+The files are located in the incredible-squaring-avs/32382 subfolder of the iv1 repository.
+```
+cp -r  iv1/incredible-squaring-avs/32382 incredible-squaring-avs/config-files
+```
+* Additionally, the output of the AVS smart contracts deployment needs to be copied:
+```
+mkdir -p incredible-squaring-avs/contracts/script/output/32382/
+cp iv1/eigenlayer/incredible.json incredible-squaring-avs/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
+```
+* With the files copied over, off-chain component of the AVS can be started with the following commands.
+Please note, that they have to be run in the main folder of the AVS project.
+```
+cd incredible-squaring-avs
+```
+* Start Aggregator with:
+```
+make CHAINID=32382 start-aggregator
+```
+* and Operator (by running following command in the new terminal):
+```
+make CHAINID=32382 start-operator
+```
 
-There will be 2 images prepared:
-* iv1-dev - contains the latest dev build of EigenLayer contracts
-* iv1-avs - contains the above and Incredible Squaring AVS pre-build contracts
+The logs should appear in both terminals.
+Some of the tasks might not be validate properly, because of a timing issue.
+This problem is unique to the POS network.
 
-### Start docker compose
-There are two docker-compose configuration files.
-The first one is to deploys the POS network with the EigenLayer only.
-The second one adds the demo AVS to the network, but uses the older version of theEigenLayer.
-It is because the AVS does not work the latest EigenLayer code.
+At the end, stop docker:
+```
+cd ../iv1/docker-compose/incredible-squaring-avs
+docker-compose -f docker-compose-avs.yml down
+```
 
-_NOTE: If you experience hangs in the compilation or build process, update docker to the latest version._
+## Other scenarios
 
-
-#### EigenLayer only
+### Deploy EigenLayer only
 
 To deploy POS network only with EigenLayer contracts follow these steps:
 ```
-cd ../
 ./clean.sh
-docker-compose -f docker-compose-dev.yml up -d
+cd docker-compose/eignelayer
+docker-compose up -d
 ```
 Check logs of the eigenlayer container to confirm that all the contracts have been deployed successfully:
 ```
-docker-compose -f docker-compose-dev.yml logs eigenlayer
+docker-compose logs eigenlayer
 ```
+## Deploy Incredible Squaring AVS
 
-#### Incredible Squaring AVS
+The iv1 might be used to deploy the IS AVS from the local machine, rather than from a docker image.
 
-To deploy the POS network with EigenLayer and Incredible Squaring AVS contracts follow these steps:
-```
-cd ../
-./clean.sh
-docker-compose -f docker-compose-avs.yml up -d
-```
-Check logs of the eigenlayer, avs-demo and cast containers to confirm that all the contracts have been deployed successfully and ether has been transferred:
-```
-docker-compose -f docker-compose-avs.yml logs eigenlayer
-docker-compose -f docker-compose-avs.yml logs avs-demo
-docker-compose -f docker-compose-avs.yml logs cast
-```
+First follow steps from the [deploy the EigenLayer](#deploy-eigenlayer-only) section.
 
-### Deploy Incredible Squaring AVS
+
+_NOTE: the IS AVS might not work with latest EL code.
+In such case adjust the docker-compose and replace the image from the `iv1-eigenlayer` to the `iv1-is-avs`.
+
+
+#### Download code and copy configuration
+
+*WORK IN PROGRESS*
 
 To code of the Incredible Squaring AVS is require to continue.
 It can be found in the Ivy-Net fork [Incredible Squaring AVS](https://github.com/ivy-net/incredible-squaring-avs/tree/master).
-(_The fork is required only for one commit, which has been approved, but not yet merged._)
+(_The fork is required only for the one commit, which has been approved, but not yet merged.
+The change allows to use the CHAINID other than the 31337._)
 
 ```
-cd ../
+cd ../../../
 git clone https://github.com/ivy-net/incredible-squaring-avs.git
 ```
-If the incredible-squaring-avs folder is present ensure that it points at code from the ivy-net reposity
+If the incredible-squaring-avs folder is present ensure that it points at code from the ivy-net repository.
 
-#### Only for the simple Eigenlayer deployment
-
-_Please skip following steps if the docker-compose-avs.yml file was used above._
-
-* After docker-compose finishes deployment run following command from the _contracts_ folder of the Incredible Squaring AVS.
+* Copy configuration files specific for the POS chain to the `config-files` folder in the Incredible Squaring AVS.
+The files are located in the incredible-squaring-avs/32382 subfolder of the iv1 repository.
+```
+cp -r  iv1/incredible-squaring-avs/32382 incredible-squaring-avs/config-files
+```
+* Additionally, the output of the AVS smart contracts deployment needs to be copied:
+```
+mkdir -p incredible-squaring-avs/contracts/script/output/32382/
+cp iv1/eigenlayer/incredible.json incredible-squaring-avs/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
+```
+* Navigate to the _contracts_ folder of the Incredible Squaring AVS.
 ```
 cd incredible-squaring-avs/contracts
 ```
+* Run following command
 ```
 forge script script/IncredibleSquaringDeployer.s.sol \
  --rpc-url http://localhost:8545 \
@@ -96,30 +154,11 @@ make \
   CHAINID=32382 \
   send-fund
 ```
-* Change current directory to make easier to copy data
+* Navigate to the main folder of the AVS to start off-chain components of it.
 ```
 cd ../
 ```
-
-#### Common steps
-* Copy config files specific for the POS chain to the `config-files` folder in the Incredible Squaring AVS.
-The files are located in the incredible-squaring-avs/32382 subfolder of the iv1 repository.
-```
-cp -r  iv1/incredible-squaring-avs/32382 incredible-squaring-avs/config-files
-```
-* Additionally, the output of the AVS smart contracts deployment needs to be copied:
-```
-mkdir -p incredible-squaring-avs/contracts/script/output/32382/
-cp iv1/eigenlayer/incredible.json incredible-squaring-avs/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
-```
-* With the filed copied over, off-chain component of the AVS can be started with the following commands.
-Please note, that they have to be run in the main folder of the AVS project.
-```
-cd incredible-squaring-avs
-```
 * Start Aggregator with:
-
-* Finally, start the aggregator:
 ```
 make CHAINID=32382 start-aggregator
 ```
@@ -127,20 +166,34 @@ make CHAINID=32382 start-aggregator
 ```
 make CHAINID=32382 start-operator
 ```
+* When finish remember to stop docker-compose deployment
+```
+cd ../iv1/docker-compose/incredible-squaring-avs
+docker-compose down
+```
 
-The logs should appear in both terminal.
-Some of the tasks might not be validate properly, because of a timing issue.
-This problem is unique to the POS network.
 
-At the end stop docker images with appropriate command:
-* for eignelayer only deployment:
+# Build process
+
+*WORK IN PROGRESS*
+
+## Packer
+
+Ensure that you have docker and packer installed and docker daemon is running.
+
+Build the images with packer
 ```
-docker-compose -f docker-compose-dev.yml down
+cd packer
+packer init .
+packer build -var 'version=1.1' .
 ```
-* for the AVS + EL deployment:
-```
-docker-compose -f docker-compose-avs.yml down
-```
+_NOTE: The process might take 10--15 minutes, depends on hardware._
+
+There will be 2 images prepared:
+* iv1-dev - contains the latest dev build of EigenLayer contracts
+* iv1-avs - contains the above and Incredible Squaring AVS pre-build contracts
+
+_NOTE: If you experience hangs in the compilation or build process, update docker to the latest version._
 
 ## Docker image to deploy EigneLayer
 
@@ -162,7 +215,7 @@ Additionally, the insecure http connections are permitted from the remote hosts.
 This change enables forge (from the foundry image) to deployed the code.
 
 
-## Ethereum Proof-of-Stake Devnet
+# Original Ethereum Proof-of-Stake Devnet
 
 This repository based on the [Etherum POS DevNet](https://github.com/ivy-net/eth-pos-devnet) which is a updated fork of the [original OffchainLabs](https://github.com/OffchainLabs/eth-pos-devnet) work.
 Please check documentation there for more information.

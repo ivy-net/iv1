@@ -15,8 +15,8 @@ services:
       - --geth-genesis-json-in=/execution/genesis.json
       - --geth-genesis-json-out=/execution/genesis.json
     volumes:
-      - ./consensus:/consensus
-      - ./execution:/execution
+      - ../../consensus:/consensus
+      - ../../execution:/execution
 
   # Removes the database of the go-ethereum execution client to ensure we start from a clean state.
   # (geth has a `removedb` option, but it asks for a keyboard confirmation, so we use this instead)
@@ -24,15 +24,15 @@ services:
     image: "alpine:latest"
     command: rm -rf /execution/geth
     volumes:
-      - ./execution:/execution
+      - ../../execution:/execution
 
   # Sets up the genesis configuration for the go-ethereum client from a JSON file.
   geth-genesis:
     image: "ethereum/client-go:v1.14.3"
     command: --datadir=/execution init /execution/genesis.json
     volumes:
-      - ./execution:/execution
-      - ./execution/genesis.json:/execution/genesis.json
+      - ../../execution:/execution
+      - ../../execution/genesis.json:/execution/genesis.json
     depends_on:
       create-beacon-chain-genesis:
         condition: service_completed_successfully
@@ -76,9 +76,9 @@ services:
       - 6060:6060
       - 9090:9090
     volumes:
-      - ./consensus:/consensus
-      - ./execution:/execution
-      - ./execution/jwtsecret:/execution/jwtsecret
+      - ../../consensus:/consensus
+      - ../../execution:/execution
+      - ../../execution/jwtsecret:/execution/jwtsecret
 
   # Runs the go-ethereum execution client with the specified, unlocked account and necessary
   # APIs to allow for proof-of-stake consensus via Prysm.
@@ -125,9 +125,9 @@ services:
       beacon-chain:
         condition: service_started
     volumes:
-      - ./execution:/execution
-      - ./execution/jwtsecret:/execution/jwtsecret
-      - ./execution/geth_password.txt:/execution/geth_password.txt
+      - ../../execution:/execution
+      - ../../execution/jwtsecret:/execution/jwtsecret
+      - ../../execution/geth_password.txt:/execution/geth_password.txt
 
   # We run a validator client with 64, deterministically-generated keys that match
   # The validator keys present in the beacon chain genesis state generated a few steps above.
@@ -145,12 +145,12 @@ services:
       beacon-chain:
         condition: service_started
     volumes:
-      - ./consensus:/consensus
+      - ../../consensus:/consensus
 
   # FoundaryUp based container with local image
   # deploying EigenLayer Contracts
   eigenlayer:
-    image: "ivy-net/iv1-avs:latest"
+    image: "public.ecr.aws/z7q8a4w9/iv1-eigenlayer:latest"
     command:
       - --rpc-url
       - http://geth:8545
@@ -165,35 +165,9 @@ services:
       - M2_deploy_from_scratch.local.config.json
     working_dir: /eigenlayer/eigenlayer-contracts
     volumes:
-      - ./eigenlayer/M2_deploy_from_scratch.local.config.json:/eigenlayer/eigenlayer-contracts/script/configs/devnet/M2_deploy_from_scratch.local.config.json
-      - ./eigenlayer/output.json:/eigenlayer/eigenlayer-contracts/script/output/devnet/M2_from_scratch_deployment_data.json
-      - ./eigenlayer/run-latest.json:/eigenlayer/eigenlayer-contracts/broadcast/M2_Deploy_From_Scratch.s.sol/32382/run-latest.json
+      - ../../eigenlayer/M2_deploy_from_scratch.local.config.json:/eigenlayer/eigenlayer-contracts/script/configs/devnet/M2_deploy_from_scratch.local.config.json
+      - ../../eigenlayer/output.json:/eigenlayer/eigenlayer-contracts/script/output/devnet/M2_from_scratch_deployment_data.json
+      - ../../eigenlayer/run-latest.json:/eigenlayer/eigenlayer-contracts/broadcast/M2_Deploy_From_Scratch.s.sol/32382/run-latest.json
     depends_on:
       geth:
         condition: service_healthy
-
-# There are problems with forge remapping, it does not work inside of docker.
-#  # FoundaryUp based container with local image
-#  # deploying Demo AVS
-#  avs-demo:
-#    image: "ivy-net/iv1-avs:latest"
-#    command:
-#      - script/IncredibleSquaringDeployer.s.sol
-#      - --rpc-url
-#      - http://geth:8545
-#      - --broadcast
-#      - --unlocked
-#      - --sender
-#      - 0x123463a4b065722e99115d6c222f267d9cabb524
-#      - -v
-#    working_dir: /eigenlayer/incredible-squaring-avs/contracts
-#    volumes:
-#      - ./eigenlayer/output.json:/eigenlayer/incredible-squaring-avs/contracts/script/output/32382/eigenlayer_deployment_output.json
-#    depends_on:
-#      eigenlayer:
-#        condition: service_completed_successfully
-#
-# Extra image for network debugging
-#  test:
-#    image: "nicolaka/netshoot"
-#    command: sleep 3600

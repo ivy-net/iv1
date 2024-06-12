@@ -19,11 +19,6 @@ variable "commit" {
   description = "Commit in EigenLayer-contracts matchin the one used by the AVS"
 }
 
-variable "gcp-password" {
-  type = "string"
-  description ="Password for gcp"
-}
-
 variable "version" {
   type        = string
   description = "Version of the image"
@@ -41,7 +36,6 @@ source "docker" "eigenlayer" {
 
 build {
   sources = ["source.docker.eigenlayer"]
-
   provisioner "shell" {
     inline = [
       "apk update --no-cache && apk upgrade --no-cache",
@@ -54,24 +48,21 @@ build {
       "forge build",
     ]
   }
-
   post-processors {
     post-processor "docker-tag" {
-      repository = "ivy-net/iv1-dev"
+      repository = "public.ecr.aws/z7q8a4w9/iv1-eigenlayer"
       tags       = ["${var.version}", "latest"]
     }
     post-processor "docker-push" {
-      login = true
-      login_server = ""
-      login_password = var.gcp-password
-      login_username = ""
+      ecr_login = true
+      aws_profile = "ivy-test"
+      login_server = "public.ecr.aws/z7q8a4w9/iv1-eigenlayer"
     }
   }
 }
 
 build {
   sources = ["source.docker.eigenlayer"]
-
   provisioner "shell" {
     inline = [
       "apk update --no-cache && apk upgrade --no-cache",
@@ -88,17 +79,21 @@ build {
       "cd incredible-squaring-avs/contracts",
       "git submodule update --init --recursive",
       "git submodule status --recursive",
-      # Workaround for a remapping issue (of of remapping from normal machine)
+      # Workaround for a remapping issue (taken from remapping at 'normal' machine)
       "wget -O remappings.txt https://storage.googleapis.com/iv1-tests/remappings.txt",
       "forge install",
       "forge build",
     ]
   }
-
   post-processors {
     post-processor "docker-tag" {
-      repository = "ivy-net/iv1-avs"
+      repository = "public.ecr.aws/z7q8a4w9/iv1-is-avs"
       tags       = ["${var.version}", "latest"]
+    }
+    post-processor "docker-push" {
+      ecr_login = true
+      aws_profile = "ivy-test"
+      login_server = "public.ecr.aws/z7q8a4w9/iv1-is-avs"
     }
   }
 }
