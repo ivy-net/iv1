@@ -19,7 +19,7 @@ There is the packer script to prepare and upload iv1 images to ECR.
 The images based on forge one and contains the source code with built smart contracts of the EigenLayer (EL) and the Incredible Squaring AVS (IS) projects.
 
 ### Other folders
-Other folders contain information specific for the chain (`consenus` and `execution`) or deployed smart contracts (`eigenlayer` and `incredible-squaring-avs`).
+Other folders contain information specific for the chain (`consensus` and `execution`) or deployed smart contracts (`eigenlayer` and `incredible-squaring-avs`).
 
 ## Quick Start
 
@@ -30,7 +30,7 @@ To deploy the POS network with EigenLayer and Incredible Squaring AVS contracts 
 ```
 * Navigate to the folder with docker compose definition for the IS AVS:
 ```
-cd docker-compose/increadible-squaring-avs
+cd docker-compose/incredible-squaring-avs
 ```
 * Start Docker Compose:
 ```
