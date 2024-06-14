@@ -30,7 +30,7 @@ source "docker" "eigenlayer" {
     "WORKDIR /eigenlayer",
   ]
   commit = true
-  image  = "ghcr.io/foundry-rs/foundry"
+  image  = "ghcr.io/foundry-rs/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6"
   platform = "linux/amd64"
 }
 
@@ -50,13 +50,13 @@ build {
   }
   post-processors {
     post-processor "docker-tag" {
-      repository = "public.ecr.aws/z7q8a4w9/iv1-eigenlayer"
-      tags       = ["${var.version}", "latest"]
+      repository = "public.ecr.aws/ivynet/iv1-eigenlayer"
+      tags       = [var.version, "latest"]
     }
     post-processor "docker-push" {
       ecr_login = true
       aws_profile = "ivy-test"
-      login_server = "public.ecr.aws/z7q8a4w9/iv1-eigenlayer"
+      login_server = "public.ecr.aws/ivynet/iv1-eigenlayer"
     }
   }
 }
@@ -87,13 +87,13 @@ build {
   }
   post-processors {
     post-processor "docker-tag" {
-      repository = "public.ecr.aws/z7q8a4w9/iv1-is-avs"
-      tags       = ["${var.version}", "latest"]
+      repository = "public.ecr.aws/ivynet/iv1-is-avs"
+      tags       = [var.version, "latest"]
     }
     post-processor "docker-push" {
       ecr_login = true
       aws_profile = "ivy-test"
-      login_server = "public.ecr.aws/z7q8a4w9/iv1-is-avs"
+      login_server = "public.ecr.aws/ivynet/iv1-is-avs"
     }
   }
 }
