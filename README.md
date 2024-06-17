@@ -3,16 +3,20 @@
 ## Introduction
 
 This repository is a fork of the [POS DevNet](https://github.com/ivy-net/eth-pos-devnet) repository, extended by an automatic deployment of the EigenLayer contracts.
+There a few scenarios with different level of deployment automation (e.g. only EigenLayer smart contracts, above plus smart contracts for the Increadible Squaring AVS, the whole AVS).
 To see how it can be use to deploy an AVS check the [Quick Start](#quick-start) section.
-
 
 ## Components
 
 ### Docker compose
-There are two docker-compose configuration files located in subfolders of the `docker-compose` folder.
-The first one, in the `docker-compose/eigenlayer` subfolder, deploys the POS network with the EigenLayer contrats only.
+There are multile docker-compose configuration files located in subfolders of the `docker-compose` folder.
+The first one, in the `docker-compose/eigenlayer` subfolder, deploys the POS network with the EigenLayer contracts only.
 The second one, in the `docker-compose/incredible-squaring-avs` subfolder, adds the demo AVS to the network, but uses the older version of the EigenLayer.
 It is because this AVS does not work the latest EigenLayer code.
+Additionally, in the `docker-compose/incredible-squaring-avs-full` subfolder there is scenario deploying all AVS components (inclugin off-chain programs and monitoring tools).
+
+#### Extending scenarios library
+Please do not hesitate to add another docker-compose scenario, especially if you are an AVS developer.
 
 ### Packer
 There is the packer script to prepare and upload iv1 images to ECR.
@@ -47,7 +51,7 @@ docker-compose logs cast
 cd ../../../
 git clone https://github.com/ivy-net/incredible-squaring-avs.git
 ```
-* Copy config files specific for the POS chain to the `config-files` folder in the Incredible Squaring AVS.
+* Copy configuration files specific for the POS chain to the `config-files` folder in the Incredible Squaring AVS.
 The files are located in the incredible-squaring-avs/32382 subfolder of the iv1 repository.
 ```
 cp -r  iv1/incredible-squaring-avs/32382 incredible-squaring-avs/config-files
@@ -95,12 +99,12 @@ Check logs of the eigenlayer container to confirm that all the contracts have be
 ```
 docker-compose logs eigenlayer
 ```
-## Deploy Incredible Squaring AVS
+
+### Deploy Incredible Squaring AVS
 
 The iv1 might be used to deploy the IS AVS from the local machine, rather than from a docker image.
 
 First follow steps from the [deploy the EigenLayer](#deploy-eigenlayer-only) section.
-
 
 _NOTE: the IS AVS might not work with latest EL code.
 In such case adjust the docker-compose and replace the image from the `iv1-eigenlayer` to the `iv1-is-avs`.
@@ -119,7 +123,7 @@ The change allows to use the CHAINID other than the 31337._)
 cd ../../../
 git clone https://github.com/ivy-net/incredible-squaring-avs.git
 ```
-If the incredible-squaring-avs folder is present ensure that it points at code from the ivy-net repository.
+If the incredible-squaring-avs folder is present, ensure that git configuration points at code from the ivy-net repository.
 
 * Copy configuration files specific for the POS chain to the `config-files` folder in the Incredible Squaring AVS.
 The files are located in the incredible-squaring-avs/32382 subfolder of the iv1 repository.
@@ -129,13 +133,19 @@ cp -r  iv1/incredible-squaring-avs/32382 incredible-squaring-avs/config-files
 * Additionally, the output of the AVS smart contracts deployment needs to be copied:
 ```
 mkdir -p incredible-squaring-avs/contracts/script/output/32382/
-cp iv1/eigenlayer/incredible.json incredible-squaring-avs/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
+cp iv1/eigenlayer/output.json incredible-squaring-avs/contracts/script/output/32382/eigenlayer_deployment_output.json
 ```
+
+#### Deploy smart contracts
 * Navigate to the _contracts_ folder of the Incredible Squaring AVS.
 ```
 cd incredible-squaring-avs/contracts
 ```
-* Run following command
+* Build smart contracts
+```
+forge build
+```
+* Upload smart contracts into the blockchain
 ```
 forge script script/IncredibleSquaringDeployer.s.sol \
  --rpc-url http://localhost:8545 \
@@ -143,21 +153,23 @@ forge script script/IncredibleSquaringDeployer.s.sol \
  --unlocked \
  --sender 0x123463a4b065722e99115d6c222f267d9cabb524
 ```
+* Navigate to the main folder of the AVS to start off-chain components of it.
+```
+cd ../
+```
 * The next step is to top up the operator account. To do this run following command:
 ```
 cast send 0x860B6912C2d0337ef05bbC89b0C2CB6CbAEAB4A5 --value 10ether --private-key 0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
 ```
-or use the make command (from the main folder of the AVS repo):
+or use the make command:
 ```
 make \
   DEPLOYER_PRIVATE_KEY=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622 \
   CHAINID=32382 \
   send-fund
 ```
-* Navigate to the main folder of the AVS to start off-chain components of it.
-```
-cd ../
-```
+
+#### Run off-chain components
 * Start Aggregator with:
 ```
 make CHAINID=32382 start-aggregator
@@ -166,12 +178,50 @@ make CHAINID=32382 start-aggregator
 ```
 make CHAINID=32382 start-operator
 ```
+
+#### Finish
 * When finish remember to stop docker-compose deployment
 ```
 cd ../iv1/docker-compose/incredible-squaring-avs
 docker-compose down
 ```
 
+### Full Incredible Squaring AVS deployment
+
+In this scenario deployment of all components is automate.
+
+#### Deployment
+* Navigate to the scenario subfolder
+```
+cd docker-compose/incredible-squaring-avs-full
+```
+* Run docker compose
+```
+docker-compose up -d
+```
+* Check smart contracts deployment logs
+```
+docker-compose logs eigenlayer
+docker-compose logs avs-demo
+docker-compose logs cast
+```
+* Follow off-chain program logs
+```
+docker-compose logs -f aggregator operator
+```
+
+#### Monitoring
+
+* In the web browser navigate to the port 3000 on the localhost (http://localhost:3000)
+* Use default Grafana credentials:
+```
+user: admin
+pass: admin
+```
+* In the left hand side menu select _Dashboards_
+* Select _AVSs_ section in the main panel
+* Click onto the _Incredible Squaring_ link
+* Additionally, the promethus dashboard is avaliable at the port 9090 (https://localhost:9090)
 
 # Build process
 
@@ -179,23 +229,26 @@ docker-compose down
 
 ## Packer
 
-Ensure that you have docker and packer installed and docker daemon is running.
-
-Build the images with packer
+* Ensure that you have docker and packer installed and docker daemon is running.
+* Adjust the _docker-tag_ step and comment out the _docker-push_ in the _post_processors_ sections to avoid attempt to login to  the ivy-net ECR.
+We left commented out lines for local deployment.
+* Build the images with packer
 ```
 cd packer
 packer init .
 packer build -var 'version=1.1' .
 ```
+* If the repository is changed to the local one, adjust image name in the relevant docker-compose.yml file as well.
+
 _NOTE: The process might take 10--15 minutes, depends on hardware._
 
 There will be 2 images prepared:
-* iv1-dev - contains the latest dev build of EigenLayer contracts
-* iv1-avs - contains the above and Incredible Squaring AVS pre-build contracts
+* iv1-eigenlayer - contains the latest dev build of EigenLayer contracts
+* iv1-is-avs - contains the above and Incredible Squaring AVS pre-build contracts
 
 _NOTE: If you experience hangs in the compilation or build process, update docker to the latest version._
 
-## Docker image to deploy EigneLayer
+## Docker image to deploy EigenLayer
 
 The docker image to deploy the EigenLayer contracts bases on the [Foundry](https://book.getfoundry.sh/tutorials/foundry-docker) one.
 During the build process the image is enriched by addition of the compile smart contracts from the EigenLayer Contracts and EigenLayer Middleware repositories.
@@ -210,9 +263,13 @@ There are a few small adjustment to the original docker-compose code.
 The most obvious one is addition of the new image with the EL code.
 To enable deployment there are also small tweaks in the geth container definition.
 Firstly, the healthcheck block is added.
-It is to give time for blockchain to settle, before publishing the EL contracts.
+It is to give time for the blockchain to settle, before publishing the EL contracts.
 Additionally, the insecure http connections are permitted from the remote hosts.
 This change enables forge (from the foundry image) to deployed the code.
+
+Finally, docker image version was locked for in a few cases, because of issues with the software.
+The smart contracts cannot be deployed with geth 1.14, because of (https://github.com/ethereum/go-ethereum/issues/29898).
+Prysmctl does not have stable release and recently introduce settings for the next fork which breaks the chain deployment.
 
 
 # Original Ethereum Proof-of-Stake Devnet

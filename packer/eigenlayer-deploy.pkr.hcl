@@ -51,6 +51,7 @@ build {
   post-processors {
     post-processor "docker-tag" {
       repository = "public.ecr.aws/ivynet/iv1-eigenlayer"
+      # repository = "ivy-net/iv1-is-avs" # (uncomment it for local deployment)
       tags       = [var.version, "latest"]
     }
     post-processor "docker-push" {
@@ -88,6 +89,7 @@ build {
   post-processors {
     post-processor "docker-tag" {
       repository = "public.ecr.aws/ivynet/iv1-is-avs"
+      # repository = "ivy-net/iv1-is-avs" (uncomment it for local deployment)
       tags       = [var.version, "latest"]
     }
     post-processor "docker-push" {
