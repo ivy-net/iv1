@@ -151,6 +151,7 @@ services:
   eigenlayer:
     image: "public.ecr.aws/z7q8a4w9/iv1-eigenlayer:latest"
     command:
+      - -vvv
       - --rpc-url
       - http://geth:8545
       - --broadcast
