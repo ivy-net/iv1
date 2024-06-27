@@ -152,6 +152,7 @@ services:
   eigenlayer:
     image: "public.ecr.aws/z7q8a4w9/iv1-is-avs:latest"
     command:
+      - -vvv
       - --rpc-url
       - http://geth:8545
       - --broadcast
@@ -178,6 +179,7 @@ services:
     image: "public.ecr.aws/z7q8a4w9/iv1-is-avs:latest"
     command:
       - script/IncredibleSquaringDeployer.s.sol
+      - -vvv
       - --rpc-url
       - http://geth:8545
       - --broadcast
