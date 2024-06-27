@@ -1,0 +1,211 @@
+version: "3.9"
+services:
+  # Creates a genesis state for the beacon chain using a YAML configuration file and
+  # a deterministic set of 64 validators.
+  create-beacon-chain-genesis:
+    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:HEAD-aec349"
+    command:
+      - testnet
+      - generate-genesis
+      - --fork=deneb
+      - --num-validators=64
+      - --genesis-time-delay=15
+      - --output-ssz=/consensus/genesis.ssz
+      - --chain-config-file=/consensus/config.yml
+      - --geth-genesis-json-in=/execution/genesis.json
+      - --geth-genesis-json-out=/execution/genesis.json
+    volumes:
+      - ../../consensus:/consensus
+      - ../../execution:/execution
+
+  # Removes the database of the go-ethereum execution client to ensure we start from a clean state.
+  # (geth has a `removedb` option, but it asks for a keyboard confirmation, so we use this instead)
+  geth-remove-db:
+    image: "alpine:latest"
+    command: rm -rf /execution/geth
+    volumes:
+      - ../../execution:/execution
+
+  # Sets up the genesis configuration for the go-ethereum client from a JSON file.
+  geth-genesis:
+    image: "ethereum/client-go:v1.14.5"
+    command: --datadir=/execution init /execution/genesis.json
+    volumes:
+      - ../../execution:/execution
+      - ../../execution/genesis.json:/execution/genesis.json
+    depends_on:
+      create-beacon-chain-genesis:
+        condition: service_completed_successfully
+      geth-remove-db:
+        condition: service_completed_successfully
+
+  # Runs a Prysm beacon chain from a specified genesis state created in the previous step
+  # and connects to go-ethereum in the same network as the execution client.
+  # The account used in go-ethereum is set as the suggested fee recipient for transactions
+  # proposed via the validators attached to the beacon node.
+  beacon-chain:
+    image: "gcr.io/prysmaticlabs/prysm/beacon-chain:stable"
+    command:
+      - --datadir=/consensus/beacondata
+      # No peers to sync with in this testnet, so setting to 0
+      - --min-sync-peers=0
+      - --genesis-state=/consensus/genesis.ssz
+      - --bootstrap-node=
+      - --interop-eth1data-votes
+      # The chain configuration file used for setting up Prysm
+      - --chain-config-file=/consensus/config.yml
+      # We specify the chain id used by our execution client
+      - --contract-deployment-block=0
+      - --chain-id=${CHAIN_ID:-32382}
+      - --rpc-host=0.0.0.0
+      - --grpc-gateway-host=0.0.0.0
+      - --execution-endpoint=http://geth:8551
+      - --accept-terms-of-use
+      - --jwt-secret=/execution/jwtsecret
+      - --suggested-fee-recipient=0x123463a4b065722e99115d6c222f267d9cabb524
+      - --minimum-peers-per-subnet=0
+      - --enable-debug-rpc-endpoints
+      - --force-clear-db
+    depends_on:
+      create-beacon-chain-genesis:
+        condition: service_completed_successfully
+    ports:
+      - 4000:4000
+      - 3500:3500
+      - 8080:8080
+      - 6060:6060
+      - 9090:9090
+    volumes:
+      - ../../consensus:/consensus
+      - ../../execution:/execution
+      - ../../execution/jwtsecret:/execution/jwtsecret
+
+  # Runs the go-ethereum execution client with the specified, unlocked account and necessary
+  # APIs to allow for proof-of-stake consensus via Prysm.
+  geth:
+    image: "ethereum/client-go:v1.14.5"
+    command:
+      - --ipcdisable
+      # sockets requires short paths, so disable ipc
+      # https://github.com/ethereum/go-ethereum/issues/16342#issuecomment-444470319
+      - --http
+      - --http.api=eth,net,web3
+      - --http.addr=0.0.0.0
+      - --http.corsdomain=*
+      # To enable deployments with forge docker
+      - --http.vhosts=*
+      - --ws
+      - --ws.api=eth,net,web3
+      - --ws.addr=0.0.0.0
+      - --ws.origins=*
+      - --authrpc.vhosts=*
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.jwtsecret=/execution/jwtsecret
+      - --datadir=/execution
+      - --allow-insecure-unlock
+      - --unlock=0x123463a4b065722e99115d6c222f267d9cabb524
+      - --password=/execution/geth_password.txt
+      - --nodiscover
+      - --syncmode=full
+    # Added for network to settle, so eigenlayer can be deployed
+    healthcheck:
+      test: wget http://localhost:8545 || exit 1
+      interval: 20s
+      timeout: 1s
+      retries: 5
+      start_period: 20s
+    ports:
+      - 8551:8551
+      - 8545:8545
+      - 8546:8546
+    depends_on:
+      geth-genesis:
+        condition: service_completed_successfully
+      beacon-chain:
+        condition: service_started
+    volumes:
+      - ../../execution:/execution
+      - ../../execution/jwtsecret:/execution/jwtsecret
+      - ../../execution/geth_password.txt:/execution/geth_password.txt
+
+  # We run a validator client with 64, deterministically-generated keys that match
+  # The validator keys present in the beacon chain genesis state generated a few steps above.
+  validator:
+    image: "gcr.io/prysmaticlabs/prysm/validator:stable"
+    command:
+      - --beacon-rpc-provider=beacon-chain:4000
+      - --datadir=/consensus/validatordata
+      - --accept-terms-of-use
+      - --interop-num-validators=64
+      - --interop-start-index=0
+      - --chain-config-file=/consensus/config.yml
+      - --force-clear-db
+    depends_on:
+      beacon-chain:
+        condition: service_started
+    volumes:
+      - ../../consensus:/consensus
+
+  # FoundaryUp based container with local image
+  # deploying EigenLayer Contracts
+  eigenlayer:
+    image: "public.ecr.aws/ivynet/iv1-hw-avs:latest"
+    command:
+      - -vvv
+      - --rpc-url
+      - http://geth:8545
+      - --broadcast
+      - --sig
+      - "run(string memory configFile)"
+      - --unlocked
+      - --sender
+      - 0x123463a4b065722e99115d6c222f267d9cabb524
+      - script/deploy/devnet/M2_Deploy_From_Scratch.s.sol
+      - --
+      - M2_deploy_from_scratch.local.config.json
+    working_dir: /eigenlayer/eigenlayer-contracts
+    volumes:
+      - ../../eigenlayer/M2_deploy_from_scratch.local.config.json:/eigenlayer/eigenlayer-contracts/script/configs/devnet/M2_deploy_from_scratch.local.config.json
+      - ../../eigenlayer/output.json:/eigenlayer/eigenlayer-contracts/script/output/devnet/M2_from_scratch_deployment_data.json
+      - ../../eigenlayer/run-latest.json:/eigenlayer/eigenlayer-contracts/broadcast/M2_Deploy_From_Scratch.s.sol/32382/run-latest.json
+    depends_on:
+      geth:
+        condition: service_healthy
+
+  # FoundaryUp based container with local image
+  # deploying Demo AVS
+  avs-demo:
+    image: "public.ecr.aws/ivynet/iv1-hw-avs:latest"
+    command:
+      - script/HelloWorldDeployer.s.sol
+      - -vvv
+      - --rpc-url
+      - http://geth:8545
+      - --broadcast
+      - --unlocked
+      - --sender
+      - 0x123463a4b065722e99115d6c222f267d9cabb524
+    working_dir: /eigenlayer/hello-world-avs/contracts
+    volumes:
+      - ../../eigenlayer/output.json:/eigenlayer/hello-world-avs/contracts/script/output/32382/eigenlayer_deployment_output.json
+      - ../../eigenlayer/hello_world.json:/eigenlayer/hello-world-avs/contracts/script/output/32382/hello_world_avs_deployment_output.json
+    depends_on:
+      eigenlayer:
+        condition: service_completed_successfully
+
+  # Send some money around
+  cast:
+    image: "ghcr.io/foundry-rs/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6"
+    entrypoint: cast
+    command:
+      - send
+      - 0x860B6912C2d0337ef05bbC89b0C2CB6CbAEAB4A5
+      - --rpc-url
+      - http://geth:8545
+      - --value
+      - 10ether
+      - --private-key
+      - 0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
+    depends_on:
+      avs-demo:
+        condition: service_completed_successfully

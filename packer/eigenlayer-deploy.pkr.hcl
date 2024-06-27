@@ -32,7 +32,6 @@ source "docker" "eigenlayer" {
   commit = true
   image  = "ghcr.io/foundry-rs/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6"
   platform = "linux/amd64"
-}
 
 build {
   sources = ["source.docker.eigenlayer"]
@@ -97,5 +96,40 @@ build {
       aws_profile = "ivy-test"
       login_server = "public.ecr.aws/ivynet/iv1-is-avs"
     }
+  }
+}
+
+build {
+  sources = ["source.docker.eigenlayer"]
+  provisioner "shell" {
+    inline = [
+      "apk update --no-cache && apk upgrade --no-cache",
+      "apk add --update --no-cache git",
+      "mkdir /eigenlayer",
+      "cd /eigenlayer",
+      "git clone https://github.com/Layr-Labs/eigenlayer-contracts.git",
+      "cd eigenlayer-contracts",
+      "forge install",
+      "forge build",
+      "cd /eigenlayer",
+      "git clone https://github.com/Layr-Labs/hello-world-avs",
+      "cd hello-world-avs/contracts",
+      "git submodule update --init --recursive",
+      "git submodule status --recursive",
+      "forge install",
+      "forge build",
+    ]
+  }
+  post-processors {
+    post-processor "docker-tag" {
+      repository = "public.ecr.aws/ivynet/iv1-hw-avs" # (comment it out for local deployment)
+      # repository = "ivy-net/iv1-hw-avs" (uncomment it for local deployment)
+      tags       = [var.version, "latest"]
+    }
+    #    post-processor "docker-push" {
+    #      ecr_login = true
+    #      aws_profile = "ivy-test"
+    #      login_server = "public.ecr.aws/ivynet/iv1-hw-avs"
+    #    }
   }
 }
