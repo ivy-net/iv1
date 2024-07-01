@@ -149,7 +149,7 @@ services:
   # FoundaryUp based container with local image
   # deploying EigenLayer Contracts
   eigenlayer:
-    image: "public.ecr.aws/z7q8a4w9/iv1-is-avs:latest"
+    image: "public.ecr.aws/ivynet/iv1-is-avs:latest"
     command:
       - -vvv
       - --rpc-url
@@ -175,7 +175,7 @@ services:
   # FoundaryUp based container with local image
   # deploying Demo AVS
   avs-demo:
-    image: "public.ecr.aws/z7q8a4w9/iv1-is-avs:latest"
+    image: "public.ecr.aws/ivynet/iv1-is-avs:latest"
     command:
       - script/IncredibleSquaringDeployer.s.sol
       - -vvv
