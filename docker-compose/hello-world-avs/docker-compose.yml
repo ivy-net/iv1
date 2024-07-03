@@ -188,7 +188,7 @@ services:
     working_dir: /eigenlayer/hello-world-avs/contracts
     volumes:
       - ../../eigenlayer/output.json:/eigenlayer/hello-world-avs/contracts/script/output/32382/eigenlayer_deployment_output.json
-      - ../../eigenlayer/hello_world.json:/eigenlayer/hello-world-avs/contracts/script/output/32382/hello_world_avs_deployment_output.json
+      - ../../hello-world/output.json:/eigenlayer/hello-world-avs/contracts/script/output/32382/hello_world_avs_deployment_output.json
     depends_on:
       eigenlayer:
         condition: service_completed_successfully
