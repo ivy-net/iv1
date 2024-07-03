@@ -188,7 +188,7 @@ services:
     working_dir: /eigenlayer/incredible-squaring-avs/contracts
     volumes:
       - ../../eigenlayer/output.json:/eigenlayer/incredible-squaring-avs/contracts/script/output/32382/eigenlayer_deployment_output.json
-      - ../../eigenlayer/incredible.json:/eigenlayer/incredible-squaring-avs/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
+      - ../../incredible-squaring-avs/output.json:/eigenlayer/incredible-squaring-avs/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
     depends_on:
       eigenlayer:
         condition: service_completed_successfully
