@@ -1,0 +1,26 @@
+diff --git a/operator/rust/crates/operator/src/start_operator.rs b/operator/rust/crates/operator/src/start_operator.rs
+index 2005bf0..22a4b34 100644
+--- a/operator/rust/crates/operator/src/start_operator.rs
++++ b/operator/rust/crates/operator/src/start_operator.rs
+@@ -114,8 +114,8 @@ async fn monitor_new_tasks() -> Result<()> {
+     // If you want to send this tx to holesky , please uncomment the gas price and gas limit
+     let _new_task_tx = hello_world_contract
+         .createNewTask(word.to_owned())
+-        // .gas_price(20000000000)
+-        // .gas(300000)
++        .gas_price(20000000000)
++        .gas(300000)
+         .send()
+         .await?
+         .get_receipt()
+@@ -231,8 +231,8 @@ async fn register_operator() -> Result<()> {
+     let registeroperator_details = contract_ecdsa_stake_registry
+         .registerOperatorWithSignature(wallet.clone().address(), operator_signature);
+     let _tx = registeroperator_details
+-        // .gas(300000)
+-        // .gas_price(20000000000)
++        .gas(300000)
++        .gas_price(20000000000)
+         .send()
+         .await?
+         .get_receipt()

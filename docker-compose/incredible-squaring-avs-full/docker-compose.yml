@@ -150,7 +150,7 @@ services:
   # FoundaryUp based container with local image
   # deploying EigenLayer Contracts
   eigenlayer:
-    image: "public.ecr.aws/z7q8a4w9/iv1-is-avs:latest"
+    image: "public.ecr.aws/ivynet/iv1-is-avs:latest"
     command:
       - -vvv
       - --rpc-url
@@ -176,7 +176,7 @@ services:
   # FoundaryUp based container with local image
   # deploying Demo AVS
   avs-demo:
-    image: "public.ecr.aws/z7q8a4w9/iv1-is-avs:latest"
+    image: "public.ecr.aws/ivynet/iv1-is-avs:latest"
     command:
       - script/IncredibleSquaringDeployer.s.sol
       - -vvv
@@ -189,7 +189,7 @@ services:
     working_dir: /eigenlayer/incredible-squaring-avs/contracts
     volumes:
       - ../../eigenlayer/output.json:/eigenlayer/incredible-squaring-avs/contracts/script/output/32382/eigenlayer_deployment_output.json
-      - ../../eigenlayer/incredible.json:/eigenlayer/incredible-squaring-avs/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
+      - ../../incredible-squaring-avs/output.json:/eigenlayer/incredible-squaring-avs/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
     depends_on:
       eigenlayer:
         condition: service_completed_successfully
@@ -223,7 +223,7 @@ services:
       - 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
     volumes:
       - ../../incredible-squaring-avs/32382/aggregator-docker-compose.yaml:/incredible-squaring/aggregator-docker-compose.yaml
-      - ../../eigenlayer/incredible.json:/incredible-squaring/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
+      - ../../incredible-squaring-avs/output.json:/incredible-squaring/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
     working_dir: /incredible-squaring
     depends_on:
       cast:

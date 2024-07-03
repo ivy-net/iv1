@@ -149,7 +149,7 @@ services:
   # FoundaryUp based container with local image
   # deploying EigenLayer Contracts
   eigenlayer:
-    image: "public.ecr.aws/ivynet/iv1-is-avs:latest"
+    image: "public.ecr.aws/ivynet/iv1-hw-avs:latest"
     command:
       - -vvv
       - --rpc-url
@@ -175,9 +175,9 @@ services:
   # FoundaryUp based container with local image
   # deploying Demo AVS
   avs-demo:
-    image: "public.ecr.aws/ivynet/iv1-is-avs:latest"
+    image: "public.ecr.aws/ivynet/iv1-hw-avs:latest"
     command:
-      - script/IncredibleSquaringDeployer.s.sol
+      - script/HelloWorldDeployer.s.sol
       - -vvv
       - --rpc-url
       - http://geth:8545
@@ -185,10 +185,10 @@ services:
       - --unlocked
       - --sender
       - 0x123463a4b065722e99115d6c222f267d9cabb524
-    working_dir: /eigenlayer/incredible-squaring-avs/contracts
+    working_dir: /eigenlayer/hello-world-avs/contracts
     volumes:
-      - ../../eigenlayer/output.json:/eigenlayer/incredible-squaring-avs/contracts/script/output/32382/eigenlayer_deployment_output.json
-      - ../../incredible-squaring-avs/output.json:/eigenlayer/incredible-squaring-avs/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
+      - ../../eigenlayer/output.json:/eigenlayer/hello-world-avs/contracts/script/output/32382/eigenlayer_deployment_output.json
+      - ../../hello-world-avs/output.json:/eigenlayer/hello-world-avs/contracts/script/output/32382/hello_world_avs_deployment_output.json
     depends_on:
       eigenlayer:
         condition: service_completed_successfully
