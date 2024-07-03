@@ -309,9 +309,10 @@ packer build -var 'version=1.1' .
 
 _NOTE: The process might take 10--15 minutes, depends on hardware._
 
-There will be 2 images prepared:
+There will be 3 images prepared:
 * iv1-eigenlayer - contains the latest dev build of EigenLayer contracts
 * iv1-is-avs - contains the above and Incredible Squaring AVS pre-build contracts
+* iv1-hw-avs - container EigenLayer and Hello World AVS pre-build contracts
 
 _NOTE: If you experience hangs in the compilation or build process, update docker to the latest version._
 
