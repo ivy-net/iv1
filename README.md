@@ -1,29 +1,39 @@
 # Ethereum Proof-of-Stake Devnet with deployment of the EigenLayer contracts
 
-## Introduction
+# Introduction
 
 This repository is a fork of the [POS DevNet](https://github.com/ivy-net/eth-pos-devnet) repository, extended by an automatic deployment of the EigenLayer contracts.
-There a few scenarios with different level of deployment automation (e.g. only EigenLayer smart contracts, above plus smart contracts for the Increadible Squaring AVS, the whole AVS).
+There a few scenarios with different level of deployment automation (e.g. only EigenLayer smart contracts, above plus smart contracts for the Incredible Squaring AVS, the whole AVS).
 To see how it can be use to deploy an AVS check the [Quick Start](#quick-start) section.
 
-## Components
+# Scenarios
 
-### Docker compose
-There are multile docker-compose configuration files located in subfolders of the `docker-compose` folder.
+## Docker compose
+There are multiple docker-compose configuration files located in subfolders of the `docker-compose` folder.
 The first one, in the `docker-compose/eigenlayer` subfolder, deploys the POS network with the EigenLayer contracts only.
-The second one, in the `docker-compose/incredible-squaring-avs` subfolder, adds the demo AVS to the network, but uses the older version of the EigenLayer.
+The second one, in the `docker-compose/incredible-squaring-avs` subfolder, adds the demo (Incredible Squaring) AVS to the network, but uses the older version of the EigenLayer.
 It is because this AVS does not work the latest EigenLayer code.
-Additionally, in the `docker-compose/incredible-squaring-avs-full` subfolder there is scenario deploying all AVS components (inclugin off-chain programs and monitoring tools).
+Additionally, in the `docker-compose/incredible-squaring-avs-full` subfolder there is scenario deploying all AVS components (including off-chain programs and monitoring tools).
+Hello World, another _demo AVS_, can be deployed using the compose file in the `docker-compose/hello-world` subfolder.
 
-#### Extending scenarios library
+## Documentation
+* [Ethereum POS with EigenLayer smart contracts](#deploy-eigenlayer-only)
+* [On Chain Incredible Squaring deployment](#quick-start)
+* [Full Incredible Squaring deployment with Grafana dashboard](#full-increadible-squaring-avs-deployment)
+* [Hello World Example](#hello-world)
+
+
+### Extending scenarios library
 Please do not hesitate to add another docker-compose scenario, especially if you are an AVS developer.
+
+## Other Folders
 
 ### Packer
 There is the packer script to prepare and upload iv1 images to ECR.
 The images based on forge one and contains the source code with built smart contracts of the EigenLayer (EL) and the Incredible Squaring AVS (IS) projects.
 
 ### Other folders
-Other folders contain information specific for the chain (`consensus` and `execution`) or deployed smart contracts (`eigenlayer` and `incredible-squaring-avs`).
+Other folders contain information specific for the chain (`consensus` and `execution`) or deployed smart contracts (`eigenlayer`, `incredible-squaring-avs` and `hello-world`).
 
 ## Quick Start
 
@@ -61,7 +71,7 @@ cp -r  iv1/incredible-squaring-avs/32382 incredible-squaring-avs/config-files
 mkdir -p incredible-squaring-avs/contracts/script/output/32382/
 cp iv1/eigenlayer/incredible.json incredible-squaring-avs/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
 ```
-* With the files copied over, off-chain component of the AVS can be started with the following commands.
+* With the files copied over, off-chain components of the AVS can be started with the following commands.
 Please note, that they have to be run in the main folder of the AVS project.
 ```
 cd incredible-squaring-avs
@@ -222,6 +232,63 @@ pass: admin
 * Select _AVSs_ section in the main panel
 * Click onto the _Incredible Squaring_ link
 * Additionally, the promethus dashboard is avaliable at the port 9090 (https://localhost:9090)
+
+### Hello World
+
+To deploy the POS network with EigenLayer and Hello World contracts follow these steps:
+* Clean previous deployments
+```
+./clean.sh
+```
+* Navigate to the folder with docker compose definition for the HW AVS:
+```
+cd docker-compose/hello-world-avs
+```
+* Start Docker Compose:
+```
+docker-compose up -d
+```
+* Check logs of the eigenlayer, avs-demo and cast containers to confirm that all the contracts have been deployed successfully and ether has been transferred:
+```
+docker-compose logs eigenlayer
+docker-compose logs avs-demo
+docker-compose logs cast
+```
+* Download the source code of the hello-world (to run the off-chain components):
+```
+cd ../../../
+git clone https://github.com/Layr-Labs/hello-world-avs.git
+```
+* Copy the env file specific for the POS chain to the Hello World AVS folder.
+The file was prepared base on information from the eigenlayer and hello-world smart contract outputs.
+Information on which variable equals which smart contract address in the _pairing.txt_ file.
+```
+cp iv1/hello-world-avs/32382/env hello-world-avs/.env
+```
+* Next the rust code of the operator needs be modified (gas limit has to be added).
+Please note, that they have to be run in the main folder of the AVS project.
+```
+cp iv1/hello-world-avs/rust-operator.patch hello-world-avs
+cd hello-world-avs
+patch  -p1 < rust-operator.patch
+```
+* With the files copied over, off-chain components of the AVS can be started with the following commands.
+* Start Operator with:
+```
+make start-rust-operator
+```
+* and start the spam task:
+```
+make spam-rust-tasks
+```
+
+The logs should appear in both terminals.
+
+At the end, stop docker:
+```
+cd ../iv1/docker-compose/hello-world-avs
+docker-compose -f docker-compose.yml down
+```
 
 # Build process
 
