@@ -29,9 +29,10 @@ source "docker" "eigenlayer" {
     "ENTRYPOINT [\"forge\", \"script\"]",
     "WORKDIR /eigenlayer",
   ]
-  commit = true
-  image  = "ghcr.io/foundry-rs/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6"
+  commit   = true
+  image    = "ghcr.io/foundry-rs/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6"
   platform = "linux/amd64"
+}
 
 build {
   sources = ["source.docker.eigenlayer"]
@@ -51,11 +52,11 @@ build {
     post-processor "docker-tag" {
       repository = "public.ecr.aws/ivynet/iv1-eigenlayer" # (comment it out for local deployment)
       # repository = "ivy-net/iv1-is-avs" # (uncomment it for local deployment)
-      tags       = [var.version, "latest"]
+      tags = [var.version, "latest"]
     }
     post-processor "docker-push" {
-      ecr_login = true
-      aws_profile = "ivy-test"
+      ecr_login    = true
+      aws_profile  = "ivy-test"
       login_server = "public.ecr.aws/ivynet/iv1-eigenlayer"
     }
   }
@@ -89,11 +90,11 @@ build {
     post-processor "docker-tag" {
       repository = "public.ecr.aws/ivynet/iv1-is-avs" # (comment it out for local deployment)
       # repository = "ivy-net/iv1-is-avs" (uncomment it for local deployment)
-      tags       = [var.version, "latest"]
+      tags = [var.version, "latest"]
     }
     post-processor "docker-push" {
-      ecr_login = true
-      aws_profile = "ivy-test"
+      ecr_login    = true
+      aws_profile  = "ivy-test"
       login_server = "public.ecr.aws/ivynet/iv1-is-avs"
     }
   }
@@ -124,12 +125,12 @@ build {
     post-processor "docker-tag" {
       repository = "public.ecr.aws/ivynet/iv1-hw-avs" # (comment it out for local deployment)
       # repository = "ivy-net/iv1-hw-avs" (uncomment it for local deployment)
-      tags       = [var.version, "latest"]
+      tags = [var.version, "latest"]
     }
-    #    post-processor "docker-push" {
-    #      ecr_login = true
-    #      aws_profile = "ivy-test"
-    #      login_server = "public.ecr.aws/ivynet/iv1-hw-avs"
-    #    }
+    post-processor "docker-push" {
+      ecr_login    = true
+      aws_profile  = "ivy-test"
+      login_server = "public.ecr.aws/ivynet/iv1-hw-avs"
+    }
   }
 }

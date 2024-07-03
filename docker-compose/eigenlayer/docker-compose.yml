@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   # Creates a genesis state for the beacon chain using a YAML configuration file and
   # a deterministic set of 64 validators.
@@ -149,7 +148,8 @@ services:
   # FoundaryUp based container with local image
   # deploying EigenLayer Contracts
   eigenlayer:
-    image: "public.ecr.aws/z7q8a4w9/iv1-eigenlayer:latest"
+    platform: linux/amd64
+    image: "public.ecr.aws/ivynet/iv1-eigenlayer:latest"
     command:
       - -vvv
       - --rpc-url
