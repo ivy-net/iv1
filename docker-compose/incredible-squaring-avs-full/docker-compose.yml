@@ -223,7 +223,7 @@ services:
       - 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
     volumes:
       - ../../incredible-squaring-avs/32382/aggregator-docker-compose.yaml:/incredible-squaring/aggregator-docker-compose.yaml
-      - ../../eigenlayer/incredible.json:/incredible-squaring/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
+      - ../../incredible-squaring-avs/output.json:/incredible-squaring/contracts/script/output/32382/credible_squaring_avs_deployment_output.json
     working_dir: /incredible-squaring
     depends_on:
       cast:
