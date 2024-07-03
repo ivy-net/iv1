@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   # Creates a genesis state for the beacon chain using a YAML configuration file and
   # a deterministic set of 64 validators.
@@ -150,6 +149,7 @@ services:
   # FoundaryUp based container with local image
   # deploying EigenLayer Contracts
   eigenlayer:
+    platform: linux/amd64
     image: "public.ecr.aws/ivynet/iv1-is-avs:latest"
     command:
       - -vvv
@@ -176,6 +176,7 @@ services:
   # FoundaryUp based container with local image
   # deploying Demo AVS
   avs-demo:
+    platform: linux/amd64
     image: "public.ecr.aws/ivynet/iv1-is-avs:latest"
     command:
       - script/IncredibleSquaringDeployer.s.sol
@@ -196,6 +197,7 @@ services:
 
   # Send some money around
   cast:
+    platform: linux/amd64
     image: "ghcr.io/foundry-rs/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6"
     entrypoint: cast
     command:
