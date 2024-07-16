@@ -134,3 +134,36 @@ build {
     }
   }
 }
+
+build {
+  sources = ["source.docker.eigenlayer"]
+  provisioner "shell" {
+    inline = [
+      "apk update --no-cache && apk upgrade --no-cache",
+      "apk add --update --no-cache git",
+      "mkdir /eigenlayer",
+      "cd /eigenlayer",
+      "git clone https://github.com/Layr-Labs/eigenlayer-contracts.git",
+      "cd eigenlayer-contracts",
+      "forge install",
+      "forge build",
+      "cd /eigenlayer",
+      "git clone https://github.com/Layr-Labs/hello-world-avs",
+      "git clone https://github.com/Lagrange-Labs/zkmr-avs-contracts.git",
+      "cd zkmr-avs-contracts",
+      "make build",
+    ]
+  }
+  post-processors {
+    post-processor "docker-tag" {
+      repository = "public.ecr.aws/ivynet/iv1-zkmr-avs" # (comment it out for local deployment)
+      # repository = "ivy-net/iv1-zkmr-avs" (uncomment it for local deployment)
+      tags = [var.version, "latest"]
+    }
+    post-processor "docker-push" {
+      ecr_login    = true
+      aws_profile  = "ivy-test"
+      login_server = "public.ecr.aws/ivynet/iv1-zkmr-avs"
+    }
+  }
+}
