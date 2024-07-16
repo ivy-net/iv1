@@ -4,4 +4,3 @@ DELEGATION_MANAGER_ADDRESS =>  delegation (from EigenLayer)
 
 CONTRACT_ADDRESS => HelloWorldServiceManagerProxy (from HelloWorld)
 STAKE_REGISTRY_ADDRESS => ECDSAStakeRegistry (from HelloWorld)
-
