@@ -3,8 +3,6 @@
     "avsDirectory": "0x8BfC4B63Cb65d1004c9e9a0a8982915Dc9aAAf29",
     "avsDirectoryImplementation": "0x4ccd33E2ca7D0bacb4C433F599109012fC7E4a2F",
     "baseStrategyImplementation": "0xF3073ab62A79c316D58556555771de5A906c7E54",
-    "delayedWithdrawalRouter": "0x2f0422C1fA1a2c0fd7F9dA7cB31f07dAd223434e",
-    "delayedWithdrawalRouterImplementation": "0xA9CeC013864AB2A8E0f89922De69413A7BBBB3Cf",
     "delegation": "0x30bdaE426d3CBD42e9d41D23958Fac6AD8310f81",
     "delegationImplementation": "0x6D0a2A4501cbd0DEF6fE15B4932fa02F6118b787",
     "eigenLayerPauserReg": "0x3B92c21Ad01E7091513eAb0c26C28B8Ba1Ee21ab",
@@ -14,6 +12,8 @@
     "eigenPodManager": "0x19684c3F73246EA40D610923C0936b517Bb1F24a",
     "eigenPodManagerImplementation": "0x33D3a5512AdCf7736Bbc3BBAc8857FeD8B403b2F",
     "emptyContract": "0xa87d9FC2d07f240A07beC7Bc4783FdbD34C10e6f",
+    "rewardsCoordinator": "0x2f0422C1fA1a2c0fd7F9dA7cB31f07dAd223434e",
+    "rewardsCoordinatorImplementation": "0xA9CeC013864AB2A8E0f89922De69413A7BBBB3Cf",
     "slasher": "0xB1c65720831A5c4d1000756060EAd6190fB55055",
     "slasherImplementation": "0x5B6Ba2C3c9599E0eeb3589781a3684aC8B68d807",
     "strategies": "",
@@ -22,7 +22,7 @@
   },
   "chainInfo": {
     "chainId": 32382,
-    "deploymentBlock": 3
+    "deploymentBlock": 1
   },
   "parameters": {
     "executorMultisig": "0x123463a4B065722E99115D6c222f267d9cABb524",
