@@ -179,7 +179,7 @@ services:
     working_dir: /eigenlayer/eigenlayer-contracts
     volumes:
       - ../../eigenlayer/M2_deploy_from_scratch.local.config.json:/eigenlayer/eigenlayer-contracts/script/configs/devnet/M2_deploy_from_scratch.local.config.json
-      - ../../eigenlayer/output.json:/eigenlayer/eigenlayer-contracts/script/output/devnet/M2_from_scratch_deployment_data.json
+      - ../../incredible-squaring-avs/eigenlayer.json:/eigenlayer/eigenlayer-contracts/script/output/devnet/M2_from_scratch_deployment_data.json
       - ../../eigenlayer/run-latest.json:/eigenlayer/eigenlayer-contracts/broadcast/M2_Deploy_From_Scratch.s.sol/32382/run-latest.json
     depends_on:
       pause:
