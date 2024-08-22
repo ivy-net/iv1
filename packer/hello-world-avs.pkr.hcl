@@ -13,6 +13,12 @@ variable "account" {
   description = "Address of the account to use to publish smart contracts"
 }
 
+variable "commit" {
+  type        = string
+  default     = "cb5de4659250d56929e2d7013553465d5dd2627e"
+  description = "Commit in EigenLayer-contracts matchin the one used by the AVS"
+}
+
 variable "version" {
   type        = string
   description = "Version of the image"
@@ -28,6 +34,7 @@ source "docker" "eigenlayer" {
   platform = "linux/amd64"
 }
 
+# Hello World AVS
 build {
   sources = ["source.docker.eigenlayer"]
   provisioner "shell" {
@@ -40,18 +47,25 @@ build {
       "cd eigenlayer-contracts",
       "forge install",
       "forge build",
+      "cd /eigenlayer",
+      "git clone https://github.com/Layr-Labs/hello-world-avs",
+      "cd hello-world-avs/contracts",
+      "git submodule update --init --recursive",
+      "git submodule status --recursive",
+      "forge install",
+      "forge build",
     ]
   }
   post-processors {
     post-processor "docker-tag" {
-      repository = "public.ecr.aws/ivynet/iv1-eigenlayer" # (comment it out for local deployment)
-      # repository = "ivy-net/iv1-is-avs" # (uncomment it for local deployment)
+      repository = "public.ecr.aws/ivynet/iv1-hw-avs" # (comment it out for local deployment)
+      # repository = "ivy-net/iv1-hw-avs" (uncomment it for local deployment)
       tags = [var.version, "latest"]
     }
     post-processor "docker-push" {
       ecr_login    = true
       aws_profile  = "ivy-test"
-      login_server = "public.ecr.aws/ivynet/iv1-eigenlayer"
+      login_server = "public.ecr.aws/ivynet/iv1-hw-avs"
     }
   }
 }
