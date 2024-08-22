@@ -145,6 +145,18 @@ services:
     volumes:
       - ../../consensus:/consensus
 
+  pause:
+    image: alpine
+    command:
+      - /bin/sh
+      - -c
+      - |
+          echo "sleep for 10sec"
+          sleep 10
+    depends_on:
+      geth:
+        condition: service_healthy
+
   # FoundaryUp based container with local image
   # deploying EigenLayer Contracts
   eigenlayer:
@@ -169,8 +181,8 @@ services:
       - ../../eigenlayer/output.json:/eigenlayer/eigenlayer-contracts/script/output/devnet/M2_from_scratch_deployment_data.json
       - ../../eigenlayer/run-latest.json:/eigenlayer/eigenlayer-contracts/broadcast/M2_Deploy_From_Scratch.s.sol/32382/run-latest.json
     depends_on:
-      geth:
-        condition: service_healthy
+      pause:
+        condition: service_completed_successfully
 
   # FoundaryUp based container with local image
   # deploying Demo AVS
