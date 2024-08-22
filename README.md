@@ -9,12 +9,12 @@ To see how it can be use to deploy an AVS check the [Quick Start](#quick-start) 
 # Scenarios
 
 ## Docker compose
-There are multiple docker-compose configuration files located in subfolders of the `docker-compose` folder.
-The first one, in the `docker-compose/eigenlayer` subfolder, deploys the POS network with the EigenLayer contracts only.
-The second one, in the `docker-compose/incredible-squaring-avs` subfolder, adds the demo (Incredible Squaring) AVS to the network, but uses the older version of the EigenLayer.
+There are multiple docker-compose configuration files located in subfolders of the `scenarios` folder.
+The first one, in the `scenarios/eigenlayer` subfolder, deploys the POS network with the EigenLayer contracts only.
+The second one, in the `scenarios/incredible-squaring-avs` subfolder, adds the demo (Incredible Squaring) AVS to the network, but uses the older version of the EigenLayer.
 It is because this AVS does not work the latest EigenLayer code.
-Additionally, in the `docker-compose/incredible-squaring-avs-full` subfolder there is scenario deploying all AVS components (including off-chain programs and monitoring tools).
-Hello World, another _demo AVS_, can be deployed using the compose file in the `docker-compose/hello-world` subfolder.
+Additionally, in the `scenarios/incredible-squaring-avs-full` subfolder there is scenario deploying all AVS components (including off-chain programs and monitoring tools).
+Hello World, another _demo AVS_, can be deployed using the compose file in the `scenarios/hello-world` subfolder.
 
 ## Documentation
 * [Ethereum POS with EigenLayer smart contracts](#deploy-eigenlayer-only)
@@ -44,7 +44,7 @@ To deploy the POS network with EigenLayer and Incredible Squaring AVS contracts 
 ```
 * Navigate to the folder with docker compose definition for the IS AVS:
 ```
-cd docker-compose/incredible-squaring-avs
+cd scenarios/incredible-squaring-avs
 ```
 * Start Docker Compose:
 ```
@@ -91,7 +91,7 @@ This problem is unique to the POS network.
 
 At the end, stop docker:
 ```
-cd ../iv1/docker-compose/incredible-squaring-avs
+cd ../iv1/scenarios/incredible-squaring-avs
 docker-compose -f docker-compose.yml down
 ```
 
@@ -102,7 +102,7 @@ docker-compose -f docker-compose.yml down
 To deploy POS network only with EigenLayer contracts follow these steps:
 ```
 ./clean.sh
-cd docker-compose/eignelayer
+cd scenarios/eignelayer
 docker-compose up -d
 ```
 Check logs of the eigenlayer container to confirm that all the contracts have been deployed successfully:
@@ -192,7 +192,7 @@ make CHAINID=32382 start-operator
 #### Finish
 * When finish remember to stop docker-compose deployment
 ```
-cd ../iv1/docker-compose/incredible-squaring-avs
+cd ../iv1/scenarios/incredible-squaring-avs
 docker-compose down
 ```
 
@@ -203,7 +203,7 @@ In this scenario deployment of all components is automate.
 #### Deployment
 * Navigate to the scenario subfolder
 ```
-cd docker-compose/incredible-squaring-avs-full
+cd scenarios/incredible-squaring-avs-full
 ```
 * Run docker compose
 ```
@@ -242,7 +242,7 @@ To deploy the POS network with EigenLayer and Hello World contracts follow these
 ```
 * Navigate to the folder with docker compose definition for the HW AVS:
 ```
-cd docker-compose/hello-world-avs
+cd scenarios/hello-world-avs
 ```
 * Start Docker Compose:
 ```
@@ -286,7 +286,7 @@ The logs should appear in both terminals.
 
 At the end, stop docker:
 ```
-cd ../iv1/docker-compose/hello-world-avs
+cd ../iv1/scenarios/hello-world-avs
 docker-compose -f docker-compose.yml down
 ```
 
