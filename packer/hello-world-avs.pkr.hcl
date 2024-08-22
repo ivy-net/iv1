@@ -15,8 +15,8 @@ variable "account" {
 
 variable "commit" {
   type        = string
-  default     = "cb5de4659250d56929e2d7013553465d5dd2627e"
-  description = "Commit in EigenLayer-contracts matchin the one used by the AVS"
+  default     = "v0.3.0-holesky-rewards"
+  description = "Commit (can be a tag) in EigenLayer-contracts matchin the one used by the AVS"
 }
 
 variable "version" {
@@ -45,6 +45,7 @@ build {
       "cd /eigenlayer",
       "git clone https://github.com/Layr-Labs/eigenlayer-contracts.git",
       "cd eigenlayer-contracts",
+      "git checkout ${var.commit}",
       "forge install",
       "forge build",
       "cd /eigenlayer",
@@ -58,8 +59,7 @@ build {
   }
   post-processors {
     post-processor "docker-tag" {
-      repository = "public.ecr.aws/ivynet/iv1-hw-avs" # (comment it out for local deployment)
-      # repository = "ivy-net/iv1-hw-avs" (uncomment it for local deployment)
+      repository = "public.ecr.aws/ivynet/iv1-hw-avs"
       tags = [var.version, "latest"]
     }
     post-processor "docker-push" {
