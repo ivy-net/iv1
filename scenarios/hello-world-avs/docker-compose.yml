@@ -145,11 +145,23 @@ services:
     volumes:
       - ../../consensus:/consensus
 
+  pause:
+    image: alpine
+    command:
+      - /bin/sh
+      - -c
+      - |
+          echo "sleep for 10sec"
+          sleep 10
+    depends_on:
+      geth:
+        condition: service_healthy
+
   # FoundaryUp based container with local image
   # deploying EigenLayer Contracts
   eigenlayer:
     platform: linux/amd64
-    image: "public.ecr.aws/ivynet/iv1-eigenlayer:latest"
+    image: "public.ecr.aws/ivynet/iv1-hw-avs:latest"
     command:
       - -vvv
       - --rpc-url
@@ -166,8 +178,48 @@ services:
     working_dir: /eigenlayer/eigenlayer-contracts
     volumes:
       - ../../eigenlayer/M2_deploy_from_scratch.local.config.json:/eigenlayer/eigenlayer-contracts/script/configs/devnet/M2_deploy_from_scratch.local.config.json
-      - ../../eigenlayer/output.json:/eigenlayer/eigenlayer-contracts/script/output/devnet/M2_from_scratch_deployment_data.json
+      - ../../hello-world-avs/eigenlayer.json:/eigenlayer/eigenlayer-contracts/script/output/devnet/M2_from_scratch_deployment_data.json
       - ../../eigenlayer/run-latest.json:/eigenlayer/eigenlayer-contracts/broadcast/M2_Deploy_From_Scratch.s.sol/32382/run-latest.json
     depends_on:
-      geth:
-        condition: service_healthy
+      pause:
+        condition: service_completed_successfully
+
+  # FoundaryUp based container with local image
+  # deploying Demo AVS
+  avs-demo:
+    platform: linux/amd64
+    image: "public.ecr.aws/ivynet/iv1-hw-avs:latest"
+    command:
+      - script/HelloWorldDeployer.s.sol
+      - -vvv
+      - --rpc-url
+      - http://geth:8545
+      - --broadcast
+      - --unlocked
+      - --sender
+      - 0x123463a4b065722e99115d6c222f267d9cabb524
+    working_dir: /eigenlayer/hello-world-avs/contracts
+    volumes:
+      - ../../eigenlayer/output.json:/eigenlayer/hello-world-avs/contracts/script/output/32382/eigenlayer_deployment_output.json
+      - ../../hello-world-avs/output.json:/eigenlayer/hello-world-avs/contracts/script/output/32382/hello_world_avs_deployment_output.json
+    depends_on:
+      eigenlayer:
+        condition: service_completed_successfully
+
+  # Send some money around
+  cast:
+    platform: linux/amd64
+    image: "ghcr.io/foundry-rs/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6"
+    entrypoint: cast
+    command:
+      - send
+      - 0x860B6912C2d0337ef05bbC89b0C2CB6CbAEAB4A5
+      - --rpc-url
+      - http://geth:8545
+      - --value
+      - 10ether
+      - --private-key
+      - 0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
+    depends_on:
+      avs-demo:
+        condition: service_completed_successfully
