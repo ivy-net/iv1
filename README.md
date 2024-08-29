@@ -30,10 +30,10 @@ Please do not hesitate to add another docker-compose scenario, especially if you
 
 ### Packer
 There is the packer script to prepare and upload iv1 images to ECR.
-The images based on forge one and contains the source code with built smart contracts of the EigenLayer (EL) and the Incredible Squaring AVS (IS) projects.
+The images based on forge one and contains the source code with built smart contracts of the EigenLayer (EL), Hello World (HW) and the Incredible Squaring AVS (IS) projects.
 
 ### Other folders
-Other folders contain information specific for the chain (`consensus` and `execution`) or deployed smart contracts (`eigenlayer`, `incredible-squaring-avs` and `hello-world`).
+Other folders contain information specific for the chain (`consensus` and `execution`) or deployed smart contracts (`eigenlayer`, `incredible-squaring-avs` and `hello-world`) as well as monitoring (`prometheus` and `grafana`) are collected in the `files` folder.
 
 ## Quick Start
 

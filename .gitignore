@@ -1,7 +1,7 @@
-consensus/beacondata
-consensus/genesis.ssz
-consensus/validatordata
-execution/geth
-execution/geth.ipc
-execution/genesis.json
+files/consensus/beacondata
+files/consensus/genesis.ssz
+files/consensus/validatordata
+files/execution/geth
+files/execution/geth.ipc
+files/execution/genesis.json
 .idea/
